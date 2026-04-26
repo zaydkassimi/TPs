@@ -1,6 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { useAuth } from '../features/auth/AuthContext';
+import { useSelector, useDispatch } from 'react-redux';
+import type { RootState, AppDispatch } from '../store';
+import { logout } from '../features/auth/authSlice';
+import { setAuthToken } from '../api/axios';
 import api from '../api/axios';
 import Header from '../components/Header';
 import styles from './ProjectDetail.module.css';
@@ -10,7 +13,8 @@ interface Project { id: string; name: string; color: string; }
 export default function ProjectDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { state: authState, dispatch } = useAuth();
+  const { user } = useSelector((state: RootState) => state.auth);
+  const dispatch = useDispatch<AppDispatch>();
   const [project, setProject] = useState<Project | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -19,7 +23,7 @@ export default function ProjectDetail() {
       .then(res => setProject(res.data))
       .catch(() => navigate('/dashboard'))
       .finally(() => setLoading(false));
-  }, [id]); // BUG 1 CORRIGÉ : [id] au lieu de []
+  }, [id]);
 
   if (loading) return <div className={styles.loading}>Chargement...</div>;
   if (!project) return null;
@@ -29,8 +33,8 @@ export default function ProjectDetail() {
       <Header
         title="TaskFlow"
         onMenuClick={() => navigate('/dashboard')}
-        userName={authState.user?.name} // BUG 2 CORRIGÉ : ?.name au lieu de .name
-        onLogout={() => dispatch({ type: 'LOGOUT' })}
+        userName={user?.name}
+        onLogout={() => { setAuthToken(null); dispatch(logout()); }}
       />
       <main className={styles.main}>
         <div className={styles.header}>
