@@ -3,6 +3,7 @@ import type { ReactNode } from 'react';
 import type { AuthState, AuthAction } from './authReducer';
 import { authReducer, initialState } from './authReducer';
 
+
 interface AuthContextType {
   state: AuthState;
   dispatch: React.Dispatch<AuthAction>;
