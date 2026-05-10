@@ -1,16 +1,22 @@
 import type { Metadata } from 'next';
+import { cookies } from 'next/headers';
 import './globals.css';
+import LogoutButton from './components/LogoutButton';
 
 export const metadata: Metadata = {
   title: 'TaskFlow',
   description: 'Gestion de projets collaboratifs',
 };
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const cookieStore = await cookies();
+  const session = cookieStore.get('session');
+  let user = null;
+try {
+  user = session ? JSON.parse(session.value) : null;
+} catch {
+  user = null;
+}
   return (
     <html lang="fr">
       <body>
@@ -20,10 +26,11 @@ export default function RootLayout({
           justifyContent: 'space-between', alignItems: 'center'
         }}>
           <h2 style={{ margin: 0, fontWeight: 700 }}>TaskFlow</h2>
-          <nav style={{ display: 'flex', gap: '1rem' }}>
-            <a href="/dashboard" style={{ color: 'white' }}>Dashboard</a>
-            <a href="/login" style={{ color: 'white' }}>Login</a>
-          </nav>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            {user && <span>{user.name}</span>}
+            {user && <LogoutButton />}
+            {!user && <a href="/login" style={{ color: 'white' }}>Login</a>}
+          </div>
         </header>
         <main>{children}</main>
       </body>
